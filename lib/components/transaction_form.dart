@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class TransactionForm extends StatefulWidget {
   final void Function(String, double) onSubmit;
@@ -11,8 +12,8 @@ class TransactionForm extends StatefulWidget {
 
 class _TransactionFormState extends State<TransactionForm> {
   final titleController = TextEditingController();
-
   final valueController = TextEditingController();
+  DateTime _selectedDate;
 
   @override
   Widget build(BuildContext context) {
@@ -33,12 +34,38 @@ class _TransactionFormState extends State<TransactionForm> {
               onSubmitted: (_) => _submitForm(),
               decoration: InputDecoration(labelText: "Valor (R\$)"),
             ),
+            Container(
+              height: 70,
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      _selectedDate == null
+                          ? 'Nenhuma data selecionada!'
+                          : 'Data selecionada: ${DateFormat('dd/MM/y').format(_selectedDate)}',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  FlatButton(
+                    child: Text(
+                      "Selecionar data!",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    textColor: Theme.of(context).primaryColor,
+                    onPressed: _showDatePicker,
+                  ),
+                ],
+              ),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                FlatButton(
+                RaisedButton(
+                  color: Theme.of(context).primaryColor,
                   child: Text("Nova transação"),
-                  textColor: Colors.purple,
+                  textColor: Theme.of(context).textTheme.button.color,
                   onPressed: _submitForm,
                 ),
               ],
@@ -56,5 +83,23 @@ class _TransactionFormState extends State<TransactionForm> {
       return;
     }
     widget.onSubmit(title, value);
+  }
+
+  _showDatePicker() {
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2019),
+      lastDate: DateTime.now(),
+    ).then(
+      (pickedDate) {
+        if (pickedDate == null) {
+          return;
+        }
+        setState(() {
+          _selectedDate = pickedDate;
+        });
+      },
+    );
   }
 }

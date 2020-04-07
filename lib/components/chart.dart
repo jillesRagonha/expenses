@@ -10,52 +10,62 @@ class Chart extends StatelessWidget {
   Chart(this.recentTransactions);
 
   List<Map<String, Object>> get groupedTransactions {
-    return List.generate(7, (index) {
-      final weekDay = DateTime.now().subtract(
-        Duration(days: index),
-      );
+    return List.generate(
+      7,
+      (index) {
+        final weekDay = DateTime.now().subtract(
+          Duration(days: index),
+        );
 
-      double totalSum = 0.0;
+        double totalSum = 0.0;
 
-      for (var i = 0; i < recentTransactions.length; i++) {
-        bool sameDay = recentTransactions[i].date.day == weekDay.day;
-        bool sameMonth = recentTransactions[i].date.month == weekDay.month;
-        bool sameYear = recentTransactions[i].date.year == weekDay.year;
+        for (var i = 0; i < recentTransactions.length; i++) {
+          bool sameDay = recentTransactions[i].date.day == weekDay.day;
+          bool sameMonth = recentTransactions[i].date.month == weekDay.month;
+          bool sameYear = recentTransactions[i].date.year == weekDay.year;
 
-        if (sameDay && sameMonth && sameYear) {
-          totalSum += recentTransactions[i].value;
+          if (sameDay && sameMonth && sameYear) {
+            totalSum += recentTransactions[i].value;
+          }
         }
-      }
 
-      print("SOMA TOTAL: $totalSum");
-      print("DATA ${DateFormat.E().format(weekDay)[0]}");
+        print("SOMA TOTAL: $totalSum");
+        print("DATA ${DateFormat.E().format(weekDay)[0]}");
 
-      return {
-        'day': DateFormat.E().format(weekDay)[0],
-        'value': totalSum,
-      };
-    });
+        return {
+          'day': DateFormat.E().format(weekDay)[0],
+          'value': totalSum,
+        };
+      },
+    ).reversed.toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    groupedTransactions;
     return Card(
       elevation: 6,
       margin: EdgeInsets.all(20),
-      
-      child: Row(
-        children: groupedTransactions.map(
-          (tr){
-            return ChartBar(label: tr['day'],
-            value: tr['value'],
-            percentage: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: groupedTransactions.map((tr) {
+            return Flexible(
+              fit: FlexFit.tight,
+              child: ChartBar(
+                  label: tr['day'],
+                  value: tr['value'],
+                  percentage: (tr['value'] as double) / _weekTotalValue),
             );
-          }
-        ).toList()
-        
-        ,
+          }).toList(),
+        ),
       ),
     );
+  }
+
+  double get _weekTotalValue {
+    return groupedTransactions.fold(0.0, (sum, tr) {
+      return sum + tr['value'];
+    });
   }
 }
